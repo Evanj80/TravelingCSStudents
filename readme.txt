@@ -13,6 +13,11 @@ Iteration:
 4. If v == u and vertices ∈ P = vertices ∈ V, finish.
 5. Else, repeat the iteration.
 
+Notable changes:
+Modified the original Graph.py to work with this algorithm.
+As vertex and edge datas are read, convert them to numbers.
+See diffGraphs.patch for more details.
+
 Progress:
 Work in progress = algorithm will fail in many situations
 
@@ -43,5 +48,5 @@ last vertex does not have an edge to other vertices.
 vertices 0,1,2 are configured like in test4
 vertex 3 is not connected to other vertices.
 0 -(1)-> 1 -(2)-> 2 -(1)-> 0   3
-  <-(2)-   <-(1)-   <-(2)-  
+0 <-(2)- 1 <-(1)- 2 <-(2)- 0
 
