@@ -45,7 +45,7 @@ class Graph:
         # print(self.node_weights)
     
     #formula: TSP(s,G) = min(C(s,k) + TSP(k, G-{k})) for all k in G not equal to s
-    def TSP_dynamic(self, nodes, starting_node, original_start):
+    def TSP_dynamic(self, nodes, starting_node, original_start, calculated={}):
         if(starting_node not in self.node_weights):
             print("TSP-D: Invalid Starting Node")
         else:
@@ -54,6 +54,11 @@ class Graph:
             if(starting_node in nodes):
                 nodes = nodes.copy()
                 nodes.remove(starting_node)
+
+            identifier = str(starting_node) + '-' + str(nodes)
+            if (identifier in calculated.keys()):
+                return calculated[identifier]
+
             if(len(nodes) == 0):
                 path.append(original_start)
                 return (self.node_weights[starting_node][original_start], path)
@@ -61,12 +66,14 @@ class Graph:
                 currentMin = math.inf
                 currentMinPath = []
                 for i in nodes:
-                    tsp = self.TSP_dynamic(nodes, i, original_start)
+                    tsp = self.TSP_dynamic(nodes, i, original_start, calculated)
                     cost = self.node_weights[starting_node][i] + tsp[0]
                     if(cost < currentMin):
                         currentMin = cost
                         currentMinPath = tsp[1]
+
         path = path + currentMinPath
+        calculated[identifier] = (currentMin, path)
         return (currentMin, path)
 
 
