@@ -1,4 +1,5 @@
 import math
+import os
 from collections import defaultdict
 from itertools import permutations
 
@@ -25,11 +26,12 @@ class Graph:
             print(i + ': ' + str(self.node_weights[i]))
             
     def read_in_nodes(self):
-        nodes = [x.split(' ')[0].split("\n")[0] for x in open("test.txt").readlines()]
+        nodes = [x.split(' ')[0].split("\n")[0] for x in open(os.path.join(os.sys.path[0], "test.txt")).readlines()]
         for i in nodes:
             self.add_vertex(i)
+
     def read_in_weights(self):
-        with open("test1.txt") as file:
+        with open(os.path.join(os.sys.path[0], "test1.txt")) as file:
             for line in file:
                 line = line.split(" ")
                 starting_node = line[1]
@@ -42,37 +44,35 @@ class Graph:
                 self.add_edge(starting_node,end_node,weight_between)
         # print(self.node_weights)
     
-    #following pseudocode from https://www.baeldung.com/cs/tsp-dynamic-programming
-    def traveling_salesman_dynamic(self, nodes, starting_node):
+    #formula: TSP(s,G) = min(C(s,k) + TSP(k, G-{k})) for all k in G not equal to s
+    def TSP_dynamic(self, nodes, starting_node, original_start):
         if(starting_node not in self.node_weights):
             print("TSP-D: Invalid Starting Node")
         else:
-            visited = {}
-            cost = 0
-            visited[starting_node] = True
-            if(len(nodes) == 2):
-                cost = self.node_weights[nodes[0]][nodes[1]]
-                return cost
+            path = []
+            path.append(starting_node)
+            if(starting_node in nodes):
+                nodes = nodes.copy()
+                nodes.remove(starting_node)
+            if(len(nodes) == 0):
+                path.append(original_start)
+                return (self.node_weights[starting_node][original_start], path)
             else:
-                unvisited = list(filter((lambda l: l not in visited), nodes))
                 currentMin = math.inf
+                currentMinPath = []
                 for i in nodes:
-                    for j in unvisited:
-                        if(i != j and i != starting_node):
-                            new_nodes = nodes.copy()
-                            new_nodes.remove(j)
-                            cost = min(currentMin, self.traveling_salesman_dynamic(new_nodes, i) + self.node_weights[i][j])
-                            visited[i] = True
-                            unvisited = list(filter((lambda l: l not in visited), nodes))
-        return cost
+                    tsp = self.TSP_dynamic(nodes, i, original_start)
+                    cost = self.node_weights[starting_node][i] + tsp[0]
+                    if(cost < currentMin):
+                        currentMin = cost
+                        currentMinPath = tsp[1]
+        path = path + currentMinPath
+        return (currentMin, path)
+
 
 
 x = Graph()      
 x.read_in_nodes()
 x.read_in_weights()
 #x.print_graph()
-print(x.traveling_salesman_dynamic(list(x.node_weights.keys()), '1'))
-
-
-
-
+print(x.TSP_dynamic(list(x.node_weights.keys()), '1', '1'))
