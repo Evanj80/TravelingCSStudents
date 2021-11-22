@@ -103,7 +103,7 @@ class Graph:
         # print(self.node_weights)
     
 #formula: TSP(s,G) = min(C(s,k) + TSP(k, G-{k})) for all k in G not equal to s
-def TSP_dynamic(graph, nodes, starting_node, original_start, calculated={}):
+def TSP_dynamic(graph, nodes, starting_node, original_start, file = None, calculated={}):
     if(starting_node not in nodes):
         print("TSP-D: Invalid Starting Node")
         print("Node: ", starting_node)
@@ -116,6 +116,8 @@ def TSP_dynamic(graph, nodes, starting_node, original_start, calculated={}):
             nodes.remove(starting_node)
 
         identifier = str(starting_node) + '-' + str(nodes)
+        if(file is not None):
+            file.write(identifier + "\n")
         if (identifier in calculated.keys()):
             return calculated[identifier]
 
@@ -126,13 +128,15 @@ def TSP_dynamic(graph, nodes, starting_node, original_start, calculated={}):
             currentMin = math.inf
             currentMinPath = []
             for i in nodes:
-                tsp = TSP_dynamic(graph, nodes, i, original_start, calculated)
+                tsp = TSP_dynamic(graph, nodes, i, original_start, file, calculated)
                 cost = graph.get_edge_weight(starting_node, i) + tsp[0]
                 if(cost < currentMin):
                     currentMin = cost
                     currentMinPath = tsp[1]
         path = path + currentMinPath
         calculated[identifier] = (currentMin, path)
+        #if(file is not None):
+        #    file.write(str(identifier)+": "+str(calculated[identifier]) + "\n")#str(calculated[identifier][0]) + "-" + str(calculated[identifier][0]))
         return (currentMin, path)
 
 """
@@ -149,8 +153,11 @@ x.fixInput()
 print("Graph read, performing TSP using dynamic Programming")
 """
 
-sys.setrecursionlimit(200000)
+sys.setrecursionlimit(2000000)
 x = Graph_Array(10000, "Nodes.txt")
 x.read_in_edges("edge_weights.txt")
+with open(os.path.join(os.sys.path[0], "output.txt"), "w") as file:
+    file.write("Begin Output\n")
+    result = TSP_dynamic(x, list(x.nodes.keys()), '1', '1', file, {})
+    file.write(str(result) + "\n")
 
-print(TSP_dynamic(x, list(x.nodes.keys()), '1', '1'))
