@@ -50,7 +50,6 @@ class Graph:
         nodes = [x.replace("\n","").split(' ') for x in open("bulgaria.tsp").readlines()]
         print(nodes)
         for i in nodes:
-            print(i)
             self.add_vertex(i)
     
 
@@ -78,7 +77,6 @@ class Graph:
             # print(neighbors)
             path_list=[]
             for z in i[1:]:
-                print(i[1:])
                 starting_coords_1 = (float(self.node_list[starting_point][0]), float(self.node_list[starting_point][1]))
                 ending_coords_2 = (float(self.node_list[z][0]), float(self.node_list[starting_point][1]))
                 optimal+= geopy.distance.geodesic(starting_coords_1, ending_coords_2).km
@@ -95,12 +93,8 @@ class Graph:
             
             optimal = 0
         stop = timeit.default_timer()
-        print(type(start))
-
-        print(type(stop))
         runtime=(float)(stop-start_time)
         self.write_path(final_list, runtime)
-        print("Final path: ",final_list)
         return current_low
 
 
