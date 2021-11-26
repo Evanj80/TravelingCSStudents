@@ -22,7 +22,6 @@ class Graph:
             # self.node_weights[x[0]] = []
             self.number_of_nodes += 1
             self.node_list[x[0]]=[x[1],x[2]]
-            print(self.node_list)
 
     # def fixInput(self):
     #     for original_node in self.node_weights:
@@ -48,7 +47,6 @@ class Graph:
             
     def read_in_nodes(self):
         nodes = [x.replace("\n","").split(' ') for x in open("bulgaria.tsp").readlines()]
-        print(nodes)
         for i in nodes:
             self.add_vertex(i)
     
@@ -57,10 +55,14 @@ class Graph:
         f = open("resultsBruteForce.txt", "w")
         for i in list_final:
             x = list(i)
-            f.write(f'{x[0]},')
+            coords = self.node_list[x[0]]
+            f.write(f'{coords[0]},{coords[1]}')
+            f.write("\n")
         f.write("\n")
-        f.write(str(runtime))
+        s = open("timeBruteForce.txt", "w")
+        s.write(str(runtime))
         f.close()
+        s.close()
 
     def traveling_salesman_brute_force(self):
         start_time = (float)(timeit.default_timer())
@@ -87,6 +89,7 @@ class Graph:
             optimal+= geopy.distance.geodesic(starting_coords_1, ending_coords_2).km
             path_list.append(starting_point)
             # print(optimal)
+            print(optimal)
             if current_low>optimal:
                 current_low = optimal
                 final_list = path_list
