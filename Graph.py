@@ -2,6 +2,8 @@ from collections import defaultdict
 from itertools import permutations
 from typing import List
 import geopy.distance
+import timeit
+
 
 class Graph:
     node_weights = defaultdict(lambda : [])
@@ -52,9 +54,17 @@ class Graph:
             self.add_vertex(i)
     
 
-
+    def write_path(self,list_final,runtime):
+        f = open("resultsBruteForce.txt", "w")
+        for i in list_final:
+            x = list(i)
+            f.write(f'{x[0]},')
+        f.write("\n")
+        f.write(str(runtime))
+        f.close()
 
     def traveling_salesman_brute_force(self):
+        start_time = (float)(timeit.default_timer())
         optimal = 0
         all_pos = list(permutations(self.node_list.keys()))
         current_low=100000000000
@@ -72,18 +82,24 @@ class Graph:
                 starting_coords_1 = (float(self.node_list[starting_point][0]), float(self.node_list[starting_point][1]))
                 ending_coords_2 = (float(self.node_list[z][0]), float(self.node_list[starting_point][1]))
                 optimal+= geopy.distance.geodesic(starting_coords_1, ending_coords_2).km
-                path_list.append({starting_point,z})
+                path_list.append(starting_point)
                 starting_point = z
             starting_coords_1 = (float(self.node_list[starting_point][0]), float(self.node_list[starting_point][1]))
             ending_coords_2 = (float(self.node_list[start][0]), float(self.node_list[start][1]))
             optimal+= geopy.distance.geodesic(starting_coords_1, ending_coords_2).km
- 
+            path_list.append(starting_point)
             # print(optimal)
             if current_low>optimal:
                 current_low = optimal
                 final_list = path_list
             
             optimal = 0
+        stop = timeit.default_timer()
+        print(type(start))
+
+        print(type(stop))
+        runtime=(float)(stop-start_time)
+        self.write_path(final_list, runtime)
         print("Final path: ",final_list)
         return current_low
 
