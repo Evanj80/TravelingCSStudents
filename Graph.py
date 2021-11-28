@@ -52,7 +52,9 @@ class Graph:
     
 
     def write_path(self,list_final,runtime):
-        f = open("resultsBruteForce.txt", "w")
+        f = open("resultsBruteForce.csv", "w")
+        f.write("Long,lat")
+        f.write("\n")
         for i in list_final:
             x = list(i)
             coords = self.node_list[x[0]]
