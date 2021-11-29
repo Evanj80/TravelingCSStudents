@@ -43,3 +43,18 @@ class Graph:
                 self.addEdge(starting_vertex,end_vertex,weight_between)
         # print(self.vertex_weights)
 
+    # Find vertices that have no edges
+    def fixInput(self):
+        for original in self.vertex_weights:
+            x=[]
+            #Look at the existing connections and add them to a list temp
+            for vertex in self.vertex_weights[original]:
+                # Only keep the vertex we dont care about weight
+                x.append(vertex)
+            # Visit exisitng vertices and see if they are in list    
+            for f in self.vertex_weights.keys():
+                # If they are not and are not the same as our original node,
+                # add them with huge weight
+                if(f not in x and original != f):
+                    self.addEdge(original,f,1000)          
+
