@@ -1,24 +1,28 @@
 import math
+import geopy.distance
+import psutil
 import os
 import time
 import sys
-from collections import defaultdict
-from itertools import permutations
 
 class Graph_Array:
     number_of_nodes = 0
     nodes = {}
+
     def __init__(self, initialValue = -1, filename ="test.txt"):
         self.read_in_nodes(filename)
-        self.graph = [[initialValue]*self.number_of_nodes] * self.number_of_nodes
+        self.graph = [[float(initialValue)]*self.number_of_nodes] * self.number_of_nodes
+
 
     def read_in_nodes(self, filename="test.txt"):
-        nodes = [x.split(' ')[0].split("\n")[0] for x in open(os.path.join(os.sys.path[0], filename)).readlines()]
-        
-        for i in nodes:
-            if(i.isnumeric()):
-                self.nodes[i] = self.number_of_nodes
-                self.number_of_nodes += 1
+        with open(os.path.join(os.sys.path[0], filename)) as file:
+            i = 0
+            for line in file:
+                split = line.split()
+                if(split[0].isnumeric()):
+                    self.nodes[split[0]] = (i, float(split[1]), float(split[2]))
+                    self.number_of_nodes += 1
+                    i = i+1
     
     def read_in_edges(self, filename="test1.txt"):
         with open(os.path.join(os.sys.path[0], filename)) as file:
@@ -31,9 +35,17 @@ class Graph_Array:
                 weight = line[3]
                 weight = weight[:-1]
                 self.graph[self.nodes[starting_node]][self.nodes[end_node]] = float(weight)
+
+    def generate_edge_weights(self):
+        for i in self.nodes.keys():
+            for j in self.nodes.keys():
+                if( i != j):
+                    coords1 = (self.nodes[i][1], self.nodes[i][2])
+                    coords2 = (self.nodes[j][1], self.nodes[j][2])
+                    self.graph[self.nodes[i][0]][self.nodes[j][0]] = geopy.distance.distance(coords1, coords2).miles
     
     def get_edge_weight(self, v1, v2):
-        weight = self.graph[self.nodes[v1]][self.nodes[v2]]
+        weight = self.graph[self.nodes[v1][0]][self.nodes[v2][0]]
         if (weight != -1):
             return weight
 
@@ -116,8 +128,6 @@ def TSP_dynamic(graph, nodes, starting_node, original_start, file = None, calcul
             nodes.remove(starting_node)
 
         identifier = str(starting_node) + '-' + str(nodes)
-        if(file is not None):
-            file.write(identifier + "\n")
         if (identifier in calculated.keys()):
             return calculated[identifier]
 
@@ -135,29 +145,31 @@ def TSP_dynamic(graph, nodes, starting_node, original_start, file = None, calcul
                     currentMinPath = tsp[1]
         path = path + currentMinPath
         calculated[identifier] = (currentMin, path)
-        #if(file is not None):
-        #    file.write(str(identifier)+": "+str(calculated[identifier]) + "\n")#str(calculated[identifier][0]) + "-" + str(calculated[identifier][0]))
         return (currentMin, path)
 
-"""
-x = Graph()      
-start = time.time()
-x.read_in_nodes()
-end = time.time()
-print(x.number_of_nodes, " nodes, took ", end-start, " seconds to read")
-start = time.time()
-x.read_in_weights()
-end = time.time()
-print(x.number_of_edges, " edges, took ", end-start, " seconds to read")
-x.fixInput()
-print("Graph read, performing TSP using dynamic Programming")
-"""
+sys.setrecursionlimit(5000)
 
-sys.setrecursionlimit(2000000)
-x = Graph_Array(10000, "Nodes.txt")
-x.read_in_edges("edge_weights.txt")
-with open(os.path.join(os.sys.path[0], "output.txt"), "w") as file:
-    file.write("Begin Output\n")
-    result = TSP_dynamic(x, list(x.nodes.keys()), '1', '1', file, {})
-    file.write(str(result) + "\n")
+file = open(os.path.join(os.sys.path[0], "TSP_Dynamic_Data.txt"), "w")
+pathFile = open(os.path.join(os.sys.path[0], "TSP_Dynamic_Output.csv"), "w")
 
+x = Graph_Array(10000, "bulgaria.tsp")
+
+start = time.time()
+x.generate_edge_weights()
+end = time.time()
+
+file.write("took " + str(end-start) + " seconds to generate edges\n")
+file.write("Graph takes " + str(sys.getsizeof(x.graph)) + " bytes\n")
+
+start = time.time()
+result = TSP_dynamic(x, list(x.nodes.keys()), '1', '1')
+end = time.time()
+
+for i in result[1]:
+    pathFile.write(str(i) + "," + str(x.nodes[i][1]) + "," + str(x.nodes[i][2]) + "\n")
+
+file.write("TSP_Dynamic took " +  str(end-start) + " seconds and used " +  str(psutil.Process().memory_info().peak_wset / (1024 ** 2)) + "Mb of memory\n")
+file.write("path weight: " + str(result[0]) + "\n")
+
+file.close()
+pathFile.close()
