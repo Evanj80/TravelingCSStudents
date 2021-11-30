@@ -29,7 +29,7 @@ class Graph:
             print(i)
             
     def readInVertices(self):
-        vertices = [x.split(' ')[0] for x in open(self.verticesfile).readlines()]
+        vertices = [x.replace("\n","").split(' ')[0] for x in open(self.verticesfile).readlines()]
         for i in vertices:
             self.addVertex(int(i))
 
