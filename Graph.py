@@ -147,14 +147,11 @@ x.read_in_nodes()
 # x.read_in_weights()
 # x.fixInput()
 # x.print_graph()
-<<<<<<< HEAD
 x.preProcessData()
 print(x.traveling_salesman_brute_force())
 
 
 
-=======
 x.edgeswriter()
 #print(x.traveling_salesman_brute_force())
->>>>>>> 7d0ed4c7a5afa7599ae7c3adff5a197968937fb9
 
