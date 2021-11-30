@@ -46,7 +46,8 @@ class Graph:
                 
             
     def read_in_nodes(self):
-        nodes = [x.replace("\n","").split(' ') for x in open("bulgaria.tsp").readlines()]
+        #nodes = [x.replace("\n","").split(' ') for x in open("bulgaria.tsp").readlines()]
+        nodes = [x.split(' ') for x in open("bulgaria.tsp").readlines()]
         for i in nodes:
             self.add_vertex(i)
     
