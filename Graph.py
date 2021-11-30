@@ -4,16 +4,20 @@ from typing import List
 import geopy.distance
 import timeit
 
+from shapely.impl import DefaultImplementation
+
 
 class Graph:
     node_weights = defaultdict(lambda : [])
     number_of_nodes = 0
     node_list = defaultdict(lambda: [])
+    preProcessed = defaultdict(lambda: {})
     
     def Graph(self):
         # self.node_weights = {}
         self.number_of_nodes = 0
         self.node_list = {}
+        self.preProcessed = {}
     
     def add_vertex(self,x):
         if x[0] in self.node_weights:
@@ -67,37 +71,46 @@ class Graph:
         f.close()
         s.close()
 
+    def preProcessData(self):
+        for i in self.node_list:
+            starting_point = i
+            starting_coords_1 = (float(self.node_list[starting_point][0]), float(self.node_list[starting_point][1]))
+            for j in self.node_list:
+                optimal = 0
+                ending_coords_2 = (float(self.node_list[j][0]), float(self.node_list[j][1])) 
+                optimal= geopy.distance.geodesic(starting_coords_1, ending_coords_2).km
+                self.preProcessed[i].update({j:optimal})
+        for i,v in self.preProcessed.items():
+            print(i,v)
+
     def traveling_salesman_brute_force(self):
         start_time = (float)(timeit.default_timer())
         optimal = 0
         all_pos = list(permutations(self.node_list.keys()))
+        print(len(all_pos))
         current_low=100000000000
         path_list = []
         final_list = []
         for i in all_pos:
             starting_point = i[0]
-            #preserve starting point bad variable name tbh
             start = i[0]
-            # print(i)
-            # print(neighbors)
             path_list=[]
+            path_list.append(starting_point)
             for z in i[1:]:
-                starting_coords_1 = (float(self.node_list[starting_point][0]), float(self.node_list[starting_point][1]))
-                ending_coords_2 = (float(self.node_list[z][0]), float(self.node_list[starting_point][1]))
-                optimal+= geopy.distance.geodesic(starting_coords_1, ending_coords_2).km
-                path_list.append(starting_point)
+                optimal+= self.preProcessed[starting_point][z]
+                path_list.append(z)
                 starting_point = z
-            starting_coords_1 = (float(self.node_list[starting_point][0]), float(self.node_list[starting_point][1]))
-            ending_coords_2 = (float(self.node_list[start][0]), float(self.node_list[start][1]))
-            optimal+= geopy.distance.geodesic(starting_coords_1, ending_coords_2).km
+            optimal+= self.preProcessed[start][starting_point]
             path_list.append(start)
-            # print(optimal)
-            print(optimal)
             if current_low>optimal:
                 current_low = optimal
                 final_list = path_list
             
             optimal = 0
+            # print(i)
+            # stoppp = timeit.default_timer()
+            # runtimeee=(float)(stoppp-starttt)
+            # print(runtimeee)
         stop = timeit.default_timer()
         runtime=(float)(stop-start_time)
         self.write_path(final_list, runtime)
@@ -117,6 +130,7 @@ x.read_in_nodes()
 # x.read_in_weights()
 # x.fixInput()
 # x.print_graph()
+x.preProcessData()
 print(x.traveling_salesman_brute_force())
 
 
