@@ -3,26 +3,22 @@ Nearest Neighbor Algorithm
 Greedy algorithm that picks the best possible edge to use at each iteration.
 The algorithm will not return to the root vertex until it visits all vertices.
 
-Given a graph G(V,E).
+Given a complete graph G(V,E).
 Let P = { u } be the path found by the algorithm.
 
+Initialize: Pick a vertex u ∈ V.
 Iteration:
-1. Pick a vertex u ∈ V.
-2. Choose a v ∈ V that has the minimum distance to P[0].
-3. Add v to P.
-4. If v == u and vertices ∈ P = vertices ∈ V, finish.
-5. Else, repeat the iteration.
+1. Pick a vertex v ∈ V that is nearest to P.V[0] (min uv).
+2. Add v to P.V.
+3. If P.V ≡  G.V, return to initial vertex.
+4. Else, u=v and repeat the iteration.
+
+Running Time: O(n²)
 
 Notable changes:
 Modified the original Graph.py to work with this algorithm.
 As vertex and edge datas are read, convert them to numbers.
 See diffGraphs.patch for more details.
-
-Progress:
-Work in progress = algorithm will fail in many situations
-
-Ex: If there are vertices that are not connected by any edges,
-then program terminates.
 
 Tests:
 1. test1-edges.txt, test1-vertices.txt
