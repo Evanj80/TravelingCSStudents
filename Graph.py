@@ -52,8 +52,9 @@ class Graph:
     
 
     def write_path(self,list_final,runtime):
+        print(list_final)
         f = open("resultsBruteForce.csv", "w")
-        f.write("Long,lat")
+        f.write("Long,Lat")
         f.write("\n")
         for i in list_final:
             x = list(i)
@@ -89,7 +90,7 @@ class Graph:
             starting_coords_1 = (float(self.node_list[starting_point][0]), float(self.node_list[starting_point][1]))
             ending_coords_2 = (float(self.node_list[start][0]), float(self.node_list[start][1]))
             optimal+= geopy.distance.geodesic(starting_coords_1, ending_coords_2).km
-            path_list.append(starting_point)
+            path_list.append(start)
             # print(optimal)
             print(optimal)
             if current_low>optimal:
