@@ -62,7 +62,7 @@ else:
     exit()
 
 a = Graph(vfile,efile)
-a.fixInput()
+#a.fixInput()
 print("Graph a:", len(a.vertex_weights), "vertices")
 adjlist(a)
 
