@@ -103,22 +103,34 @@ class Graph:
         self.write_path(final_list, runtime)
         return current_low
 
-
-
-
-
-
-
-
-        
+    # edges file format
+    # i u v w
+    #
+    # i = line number
+    # u = source
+    # v = destination
+    # w = weight
+    def edgeswriter(self):
+        f = open("bulgaria-edges.tsp","w")
+        # n(n-1)/2 edges in a complete graph
+        maxedges = int((self.number_of_nodes*(self.number_of_nodes-1)) / 2 )
+        i = 0
+        for u in range(1,self.number_of_nodes+1):
+            for v in range(u,self.number_of_nodes+1):
+                # distance between coordinates
+                w = geopy.distance.geodesic(
+                    (self.node_list[str(u-0)][0],self.node_list[str(u-0)][1]),
+                    (self.node_list[str(v-0)][0],self.node_list[str(v-0)][1])
+                ).km
+                #print("%d %d %d %f" %(i,u,v,w)) 
+                f.write("%d %d %d %f\n" %(i,u,v,w)) 
+                i+=1
         
 x = Graph()      
 x.read_in_nodes()
 # x.read_in_weights()
 # x.fixInput()
 # x.print_graph()
+# x.edgeswriter()
 print(x.traveling_salesman_brute_force())
-
-
-
 
