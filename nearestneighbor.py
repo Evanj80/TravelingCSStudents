@@ -1,5 +1,7 @@
 from Graph import Graph
 import sys
+import time
+import tracemalloc
 
 # print graph as an adjacency list
 def adjlist(g):
@@ -71,7 +73,15 @@ b.addVertex(root)
 print("Graph b: (before nearest_neighbors)", len(b.vertex_weights), "vertices")
 adjlist(b)
 
+tracemalloc.start()
+start = time.monotonic()
 nearest_neighbor(a, root, root, b)
+current, peak = tracemalloc.get_traced_memory()
+stop = time.monotonic()
+tracemalloc.stop()
 
 print("Graph b: (after nearest_neighbors)", len(b.vertex_weights), "vertices")
 adjlist(b)
+print("Time %f" %(float(stop-start)))
+print("Cost %f" %sum_edges(b))
+print("Memory: %f MB (current), %f MB (max)" %(current/10**6, peak/10**6))
