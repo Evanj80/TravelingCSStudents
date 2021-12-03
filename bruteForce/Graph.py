@@ -8,54 +8,30 @@ from shapely.impl import DefaultImplementation
 
 
 class Graph:
-    node_weights = defaultdict(lambda : [])
+    #Actual # of nodes
     number_of_nodes = 0
+    #All nodes coordinates
     node_list = defaultdict(lambda: [])
+    #PreProcessed distances 
     preProcessed = defaultdict(lambda: {})
     
     def Graph(self):
-        # self.node_weights = {}
         self.number_of_nodes = 0
         self.node_list = {}
         self.preProcessed = {}
     
+    #Writes this data to the node list that keeps track of everyones coordinates
     def add_vertex(self,x):
-        if x[0] in self.node_weights:
-            return -1
-        else:
-            # self.node_weights[x[0]] = []
-            self.number_of_nodes += 1
-            self.node_list[x[0]]=[x[1],x[2]]
+        self.number_of_nodes += 1
+        self.node_list[x[0]]=[x[1],x[2]]
 
-    # def fixInput(self):
-    #     for original_node in self.node_weights:
-    #         x=[]
-    #         #Look at the existing connections and add them to a list temp
-    #         for node in self.node_weights[original_node]:
-    #             #Only keep the node we dont care about weight
-    #             x.append(node[0])
-    #         #Go through all exisitng nodes in problem and see if they are in list    
-    #         for f in self.node_list:
-    #             #If they are not and are not the same as our original node add them with huge weight
-    #             if(f not in x and original_node != f):
-    #                 self.add_edge(original_node,f,1000000)          
-
-
-    # def add_edge(self,v1,v2,edge_weight):
-    #     self.node_weights[v1].append((v2,edge_weight))
-            
-    # def print_graph(self):
-    #     for i in self.node_weights.items():
-    #         print(i)
-                
-            
+    #Reads in nodes and seperates them in [[longitude,latitude],.......]
     def read_in_nodes(self):
-        #nodes = [x.replace("\n","").split(' ') for x in open("bulgaria.tsp").readlines()]
         nodes = [x.split(' ') for x in open("bulgaria.tsp").readlines()]
         for i in nodes:
             self.add_vertex(i)
     
-
+    #Writes results to files for later mapping
     def write_path(self,list_final,runtime):
         print(list_final)
         f = open("resultsBruteForce.csv", "w")
@@ -71,47 +47,53 @@ class Graph:
         s.write(str(runtime))
         f.close()
         s.close()
-
+    
+    
     def preProcessData(self):
+        # for every node calculate its distance to every other node.
         for i in self.node_list:
             starting_point = i
+            #Save first node and calc dist to everyone else in for loop below
             starting_coords_1 = (float(self.node_list[starting_point][0]), float(self.node_list[starting_point][1]))
             for j in self.node_list:
-                optimal = 0
+                distance = 0
                 ending_coords_2 = (float(self.node_list[j][0]), float(self.node_list[j][1])) 
-                optimal= geopy.distance.geodesic(starting_coords_1, ending_coords_2).km
-                self.preProcessed[i].update({j:optimal})
-        for i,v in self.preProcessed.items():
-            print(i,v)
+                distance= geopy.distance.geodesic(starting_coords_1, ending_coords_2).km
+                #Store distances in preprocessed dict for later
+                self.preProcessed[i].update({j:distance})
 
     def traveling_salesman_brute_force(self):
         start_time = (float)(timeit.default_timer())
         optimal = 0
+        #calculate all permmuations possible
         all_pos = list(permutations(self.node_list.keys()))
         print(len(all_pos))
+        #Set insanely high current low to start to that alg can start comparing overall 
+        #path lengths
         current_low=100000000000
-        path_list = []
         final_list = []
         for i in all_pos:
             starting_point = i[0]
             start = i[0]
+            #Temp list to hold potential most optimal path
             path_list=[]
             path_list.append(starting_point)
+            #start at first node in current permuation 
             for z in i[1:]:
+                #loop through rest of permuation
                 optimal+= self.preProcessed[starting_point][z]
                 path_list.append(z)
                 starting_point = z
+            #Then add the path way back to go to where you started.
             optimal+= self.preProcessed[start][starting_point]
             path_list.append(start)
+            #If current permuation is better than all before it, save its path and 
+            #distance value 
             if current_low>optimal:
                 current_low = optimal
                 final_list = path_list
             
             optimal = 0
-            # print(i)
-            # stoppp = timeit.default_timer()
-            # runtimeee=(float)(stoppp-starttt)
-            # print(runtimeee)
         stop = timeit.default_timer()
         runtime=(float)(stop-start_time)
         self.write_path(final_list, runtime)
@@ -144,9 +126,6 @@ class Graph:
         
 x = Graph()      
 x.read_in_nodes()
-# x.read_in_weights()
-# x.fixInput()
-# x.print_graph()
 x.preProcessData()
 print(x.traveling_salesman_brute_force())
 
