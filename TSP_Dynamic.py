@@ -5,7 +5,8 @@ import os
 import time
 import sys
 
-class Graph_Array:
+# graph object using array implementation
+class Graph:
     number_of_nodes = 0
     nodes = {}
 
@@ -42,117 +43,56 @@ class Graph_Array:
                 if( i != j):
                     coords1 = (self.nodes[i][1], self.nodes[i][2])
                     coords2 = (self.nodes[j][1], self.nodes[j][2])
-                    self.graph[self.nodes[i][0]][self.nodes[j][0]] = geopy.distance.distance(coords1, coords2).miles
+                    self.graph[self.nodes[i][0]][self.nodes[j][0]] = geopy.distance.distance(coords1, coords2).km
     
     def get_edge_weight(self, v1, v2):
         weight = self.graph[self.nodes[v1][0]][self.nodes[v2][0]]
         if (weight != -1):
             return weight
-
-class Graph:
-    node_weights = {}
-    number_of_nodes = 0
-    number_of_edges = 0
-    node_list = []
     
-    def Graph(self):
-        self.node_weights = {}
-        self.number_of_nodes = 0
-        self.node_list = []
-    
-    def add_vertex(self,x):
-        if x in self.node_weights:
-            return -1
-        else:
-            self.node_weights[x] = {}
-            self.number_of_nodes += 1
-            self.node_list.append(x)
-
-    def add_edge(self,v1,v2,edge_weight):
-        self.number_of_edges += 1
-        self.node_weights[v1][v2] = float(edge_weight)
-
-    def get_edge_weight(self, v1, v2):
-        return self.node_weights[v1][v2]
-            
-    def print_graph(self):
-        for i in self.node_weights.keys():
-            print(i + ': ' + str(self.node_weights[i]))
-            
-    def read_in_nodes(self, filename="test.txt"):
-        nodes = [x.split(' ')[0].split("\n")[0] for x in open(os.path.join(os.sys.path[0], filename)).readlines()]
-        for i in nodes:
-            if(i.isnumeric()):
-                self.add_vertex(i)
-
-    def fixInput(self):
-        for original_node in self.node_weights:
-            x=[]
-            #Look at the existing connections and add them to a list temp
-            for node in self.node_weights[original_node]:
-                #Only keep the node we dont care about weight
-                x.append(node[0])
-            #Go through all exisitng nodes in problem and see if they are in list    
-            for f in self.node_list:
-                #If they are not and are not the same as our original node add them with huge weight
-                if(f not in x and original_node != f):
-                    self.add_edge(original_node,f,1000000) 
-      
-    def read_in_weights(self, filename="test1.txt"):
-        with open(os.path.join(os.sys.path[0], filename)) as file:
-            for line in file:
-                line = line.split(" ")
-                if(not line[1].isnumeric()):
-                    continue
-                starting_node = line[1]
-                # print(starting_node)
-                end_node = line[2]
-                # print(end_node)
-                weight_between = line[3]
-                weight_between = weight_between[:-1]
-                # print(weight_between)
-                self.add_edge(starting_node,end_node,weight_between)
-        # print(self.node_weights)
-    
-#formula: TSP(s,G) = min(C(s,k) + TSP(k, G-{k})) for all k in G not equal to s
+# formula: TSP(s,G) = min(C(s,k) + TSP(k, G-{k})) for all k in G not equal to s
 def TSP_dynamic(graph, nodes, starting_node, original_start, file = None, calculated={}):
     if(starting_node not in nodes):
         print("TSP-D: Invalid Starting Node")
         print("Node: ", starting_node)
         print("Nodes: ", nodes)
     else:
-        path = []
-        path.append(starting_node)
-        if(starting_node in nodes):
-            nodes = nodes.copy()
-            nodes.remove(starting_node)
+        # initialize the path and remove the current node from the unvisited nodes list
+        path = [starting_node]
+        unvisited = nodes.copy()
+        unvisited.remove(starting_node)
 
-        identifier = str(starting_node) + '-' + str(nodes)
+        # check if this subproblem has already been solved
+        identifier = str(starting_node) + '-' + str(unvisited)
         if (identifier in calculated.keys()):
             return calculated[identifier]
 
-        if(len(nodes) == 0):
+        # if there is only 1 unvisited node, add the original starting node to the end of the path and return the cost of going abck to the start
+        if(len(unvisited) == 0):
             path.append(original_start)
             return (graph.get_edge_weight(starting_node, original_start), path)
         else:
+            # for each unvisited node, call TSP again, and keep track of which one has the lowest cost
             currentMin = math.inf
             currentMinPath = []
-            for i in nodes:
-                tsp = TSP_dynamic(graph, nodes, i, original_start, file, calculated)
+            for i in unvisited:
+                tsp = TSP_dynamic(graph, unvisited, i, original_start, file, calculated)
                 cost = graph.get_edge_weight(starting_node, i) + tsp[0]
                 if(cost < currentMin):
                     currentMin = cost
                     currentMinPath = tsp[1]
+        # append the found lowest cost path to the end of the current path, save the result, and return the path and it's cost
         path = path + currentMinPath
         calculated[identifier] = (currentMin, path)
         return (currentMin, path)
 
+# Driver code
 sys.setrecursionlimit(5000)
 
 file = open(os.path.join(os.sys.path[0], "TSP_Dynamic_Data.txt"), "w")
 pathFile = open(os.path.join(os.sys.path[0], "TSP_Dynamic_Output.csv"), "w")
 
-x = Graph_Array(10000, "bulgaria.tsp")
+x = Graph(10000, "bulgaria.tsp")
 
 start = time.time()
 x.generate_edge_weights()
@@ -170,6 +110,8 @@ for i in result[1]:
 
 file.write("TSP_Dynamic took " +  str(end-start) + " seconds and used " +  str(psutil.Process().memory_info().peak_wset / (1024 ** 2)) + "Mb of memory\n")
 file.write("path weight: " + str(result[0]) + "\n")
+
+print("path weight: " + str(result[0]) + "\n")
 
 file.close()
 pathFile.close()
