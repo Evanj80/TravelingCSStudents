@@ -1,0 +1,4 @@
+took 0.014998435974121094 seconds to generate edges
+Graph takes 136 bytes
+TSP_Dynamic took 0.017000198364257812 seconds and used 28.15625Mb of memory
+path weight: 163.92813303015524

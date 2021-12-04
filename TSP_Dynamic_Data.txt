@@ -1,2 +1,0 @@
-took 0.01933002471923828 seconds to generate edges
-Graph takes 136 bytes
