@@ -1,10 +1,27 @@
+# 
+# Graph.py
+# 
+# Graph class for building a network.
+# 
+# (c) Alvin Nguyen
+# (c) Evan Chopra (original design)
+# 
 from collections import defaultdict
+
 class Graph:
+    # Filenames for list of vertices/edges.
     verticesfile = ""
     edgesfile = ""
+
+    # Graph G(V, E) = { u ∈ V, [ { v ∈ V, w } ] ∈ E }
     vertex_weights = defaultdict(lambda : [])
     number_of_vertices = 0
-    
+
+    # Initialize a graph with a given vertices file and edges file.
+    # If no vertices or edges files were used, then create an empty graph.
+    # @param vf verticesfile
+    # @param ef edgesfile
+    #
     def __init__(self, vf="", ef=""):
         self.verticesfile = vf
         self.edgesfile = ef
@@ -12,28 +29,44 @@ class Graph:
         self.number_of_vertices = 0
         if (len(self.verticesfile) > 0 and len(self.edgesfile) > 0):
             self.readInVertices()
-            self.readInWeights()
+            self.readInEdges()
     
-    def addVertex(self,x):
-        if x in self.vertex_weights:
+    # Add a vertex to the Graph.
+    # @param u vertex
+    #
+    def addVertex(self,u):
+        if u in self.vertex_weights:
             return -1
         else:
-            self.vertex_weights[x] = []
+            self.vertex_weights[u] = []
             self.number_of_vertices += 1
 
-    def addEdge(self,v1,v2,edge_weight):
-        self.vertex_weights[v1].append({v2:edge_weight})
+    # Add an edge between u and v with a weight w.
+    # @param u source vertex
+    # @param v destination vertex
+    # @param w weight
+    #
+    def addEdge(self,u,v,w):
+        self.vertex_weights[u].append({v:w})
             
+    # Print data structure of graph as dictionary with list of dictionaries.
+    # For debugging purposes.
+    #
     def print_graph(self):
         for i in self.vertex_weights.items():
             print(i)
             
+    # Read vertices from verticesfile and add them to the graph.
+    #
     def readInVertices(self):
-        vertices = [x.replace("\n","").split(' ')[0] for x in open(self.verticesfile).readlines()]
+        vertices = [x.replace("\n","").split(' ')[0]
+                for x in open(self.verticesfile).readlines()]
         for i in vertices:
             self.addVertex(int(i))
 
-    def readInWeights(self):
+    # Read edges and weights from edgesfile and add them to the graph.
+    #
+    def readInEdges(self):
         with open(self.edgesfile) as file:
             for line in file:
                 line = line.split(" ")
@@ -41,20 +74,18 @@ class Graph:
                 end_vertex = int(line[2])
                 weight_between = float(line[3])
                 self.addEdge(starting_vertex,end_vertex,weight_between)
-        # print(self.vertex_weights)
 
-    # Find vertices that have no edges
-    def fixInput(self):
-        for original in self.vertex_weights:
-            x=[]
-            #Look at the existing connections and add them to a list temp
-            for vertex in self.vertex_weights[original]:
-                # Only keep the vertex we dont care about weight
-                x.append(vertex)
-            # Visit exisitng vertices and see if they are in list    
-            for f in self.vertex_weights.keys():
-                # If they are not and are not the same as our original node,
-                # add them with huge weight
-                if(f not in x and original != f):
-                    self.addEdge(original,f,1000)          
+    # Print a graph as an adjacency list.
+    # Ex:
+    # 0 -> 1, 1 ->
+    # 1 -> 0, 1 ->
+    #
+    def adjlist(self):
+        for u, edgelist in self.vertex_weights.items():
+            children="->"
+            for edge in edgelist:
+                for v,w in edge.items():
+                    children += " %d, %f ->" % (v, w)
+            print("%s %s" % (u, children))
+        print()
 
